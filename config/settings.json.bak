@@ -1,0 +1,127 @@
+{
+  "camera": {
+    "device_id": 0,
+    "width": 640,
+    "height": 480,
+    "fps": 30
+  },
+  "motion_detec  "projection": {
+    "fullscreen": false,
+    "calibration_points": [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1]
+    ],
+    "calibration_enabled": false
+  },
+  "app": {
+    "title": "AI-Augmented Diwali Projection",
+    "debug_mode": true,
+    "show_fps": true,
+    "exit_key": "q"
+  }: {
+    "blur_size": 5,
+    "threshold": 25,
+    "min_area": 500,
+    "history": 20
+  },
+  "gesture_tracking": {
+    "min_detection_confidence": 0.7,
+    "min_tracking_confidence": 0.5,
+    "max_num_hands": 2
+  },
+  "audio_detection": {
+    "enabled": true,
+    "threshold_multiplier": 2.0,
+    "sample_rate": 44100,
+    "chunk_size": 1024,
+    "window_size": 0.5
+  },
+  "visual_effects": {
+    "diya": {
+      "fade_duration": 0.5,
+      "scale_factor": 0.5,
+      "max_instances": 10
+    },
+    "fireworks": {
+      "particle_count": 100,
+      "lifetime": 2.0,
+      "colors": [
+        "#FF5733",
+        "#FFC300",
+        "#DAF7A6",
+        "#C70039",
+        "#900C3F"
+      ]
+    },
+    "rangoli": {
+      "pattern_complexity": 3,
+      "color_scheme": "psychedelic",
+      "rotation_speed": 0.05,
+      "psychedelic": {
+        "enabled": true,
+        "color_cycle_speed": 0.03,
+        "mandala_refresh_rate": 5.0,
+        "blend_mode": "add",
+        "zoom_effect": true,
+        "complexity_min": 4,
+        "complexity_max": 8,
+        "n_rotations": 12,
+        "n_arms": 8
+      }
+    },
+    "aura": {
+      "blur_radius": 15,
+      "opacity": 0.7,
+      "color": [
+        255,
+        223,
+        0
+      ]
+    },
+    "background": {
+      "enabled": true,
+      "image_path": "diwali_bg.jpeg",
+      "opacity": 0.8
+    },
+    "ethereal_outlines": {
+      "enabled": true,
+      "outline_colors": [
+        [
+          140,
+          220,
+          255
+        ],
+        [
+          255,
+          180,
+          220
+        ],
+        [
+          180,
+          255,
+          220
+        ],
+        [
+          220,
+          180,
+          255
+        ]
+      ],
+      "glow_strength": 15,
+      "opacity": 0.8,
+      "particle_effects": true,
+      "particle_count": 100,
+      "particle_speed": 2.0,
+      "outline_thickness": 5,
+      "color_cycling": true,
+      "color_cycle_speed": 0.05,
+      "fade_duration": 1.0
+    }
+  },
+  "projection": {
+    "fullscreen": false,
+    "calibration_points": [
+      [
+        

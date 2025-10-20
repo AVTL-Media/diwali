@@ -1,0 +1,13 @@
+name: diwali-projection
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - opencv-python>=4.7.0
+    - mediapipe>=0.10.0
+    - pygame>=2.5.0
+    - numpy>=1.24.0
+    - sounddevice>=0.4.6
