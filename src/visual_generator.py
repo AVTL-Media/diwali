@@ -997,33 +997,130 @@ class VisualGenerator:
     
     def _create_firework_particles(self, origin, count=100):
         """Create a new firework explosion at the given origin."""
-        # Reduce particle count to make fireworks less noisy
-        count = min(count, 50)  # Limit to a maximum of 50 particles
+        # Get configuration
+        config = self.config.get("fireworks", {})
+        firework_type = config.get("type", "standard")
         
+        # Reduce particle count to make fireworks less noisy
+        count = min(count, config.get("max_particles", 50))
+        
+        # Select firework type based on configuration or random choice
+        if firework_type == "random":
+            available_types = ["standard", "bloom", "ring", "willow"]
+            firework_type = random.choice(available_types)
+            
+        # Create particles based on selected type
+        if firework_type == "bloom":
+            return self._create_bloom_firework(origin, count)
+        elif firework_type == "ring":
+            return self._create_ring_firework(origin, count)
+        elif firework_type == "willow":
+            return self._create_willow_firework(origin, count)
+        else:
+            # Default to standard firework
+            return self._create_standard_firework(origin, count)
+            
+    def _create_standard_firework(self, origin, count):
+        """Create a standard firework with particles expanding in all directions."""
+        config = self.config.get("fireworks", {})
         particles = []
+        
         for _ in range(count):
-            # Random angle and velocity (reduced speed)
-            angle = random.uniform(0, 2 * math.pi)
-            speed = random.uniform(1, 5)  # Slower particles
+            particles.append(self._create_single_particle(
+                origin=origin,
+                speed_range=(1, 5),
+                size_range=(1, 3),
+                lifetime_range=(0.5, min(1.5, config.get("lifetime", 1.5))),
+                angle_range=(0, 2 * math.pi)
+            ))
             
-            # Random color from config
-            color_hex = random.choice(self.config["fireworks"]["colors"])
-            color_rgb = tuple(int(color_hex.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
-            
-            # Random lifetime (shortened)
-            lifetime = random.uniform(0.5, min(1.5, self.config["fireworks"]["lifetime"]))
-            
-            particles.append({
-                "x": origin[0],
-                "y": origin[1],
-                "dx": speed * math.cos(angle),
-                "dy": speed * math.sin(angle),
-                "color": color_rgb,
-                "size": random.randint(1, 3),  # Smaller particles
-                "lifetime": lifetime,
-                "age": 0
-            })
         return particles
+        
+    def _create_bloom_firework(self, origin, count):
+        """Create a bloom firework with a spherical explosion pattern."""
+        config = self.config.get("fireworks", {})
+        particles = []
+        
+        for _ in range(count):
+            particles.append(self._create_single_particle(
+                origin=origin,
+                speed_range=(2, 6),
+                size_range=(2, 4),
+                lifetime_range=(0.7, min(2.0, config.get("lifetime", 2.0))),
+                angle_range=(0, 2 * math.pi)
+            ))
+            
+        return particles
+        
+    def _create_ring_firework(self, origin, count):
+        """Create a ring firework with particles in a circular pattern."""
+        config = self.config.get("fireworks", {})
+        particles = []
+        
+        # Use even angles for ring distribution
+        for i in range(count):
+            angle = (i / count) * 2 * math.pi
+            particles.append(self._create_single_particle(
+                origin=origin,
+                speed_range=(3, 5),
+                size_range=(1, 3),
+                lifetime_range=(0.5, min(1.2, config.get("lifetime", 1.2))),
+                angle=angle
+            ))
+            
+        return particles
+        
+    def _create_willow_firework(self, origin, count):
+        """Create a willow firework with falling particles."""
+        config = self.config.get("fireworks", {})
+        particles = []
+        
+        for _ in range(count):
+            # Initial upward bias with stronger gravity
+            angle = random.uniform(0, 2 * math.pi)
+            particles.append(self._create_single_particle(
+                origin=origin,
+                speed_range=(2, 4),
+                size_range=(1, 2),
+                lifetime_range=(0.8, min(2.0, config.get("lifetime", 2.0))),
+                angle=angle,
+                gravity_modifier=1.5
+            ))
+            
+        return particles
+        
+    def _create_single_particle(self, origin, speed_range=(1, 5), size_range=(1, 3), 
+                               lifetime_range=(0.5, 1.5), angle=None, angle_range=None,
+                               gravity_modifier=1.0):
+        """Create a single firework particle with the specified parameters."""
+        config = self.config.get("fireworks", {})
+        
+        # Determine angle
+        if angle is None:
+            angle = random.uniform(*angle_range)
+            
+        # Random speed within range
+        speed = random.uniform(*speed_range)
+        
+        # Random color from config
+        color_hex = random.choice(config.get("colors", ["#FFFFFF"]))
+        color_rgb = tuple(int(color_hex.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+        
+        # Random lifetime within range
+        lifetime = random.uniform(*lifetime_range)
+        
+        # Create and return the particle
+        return {
+            "x": origin[0],
+            "y": origin[1],
+            "dx": speed * math.cos(angle),
+            "dy": speed * math.sin(angle),
+            "color": color_rgb,
+            "size": random.randint(*size_range),
+            "lifetime": lifetime,
+            "age": 0,
+            "gravity_modifier": gravity_modifier
+        }
     
     def update(self, dt, current_frame=None):
         """
@@ -1033,6 +1130,15 @@ class VisualGenerator:
             dt: Time delta in seconds since last update
             current_frame: Optional current camera frame for person detection
         """
+        # Update each visual component separately
+        self._update_rangoli_animation(dt)
+        self._update_ethereal_effects(current_frame)
+        self._update_fireworks(dt)
+        self._update_floating_objects(dt)
+        self._increment_frame_counter()
+        
+    def _update_rangoli_animation(self, dt):
+        """Update rangoli rotation and color cycling effects."""
         # Update rangoli rotation
         rotation_speed = self.config.get("rangoli", {}).get("rotation_speed", 0.01)
         self.rangoli_angle += rotation_speed * dt * 360  # degrees per second
@@ -1053,41 +1159,47 @@ class VisualGenerator:
         if now - self.last_mandala_generation > self.mandala_refresh_rate:
             self._generate_bezier_mandalas()
             self.last_mandala_generation = now
-        
-        # Update ethereal outline effects if we have a camera frame
-        if current_frame is not None and "ethereal_outlines" in self.config:
-            ethereal_config = self.config.get("ethereal_outlines", {})
             
-            if ethereal_config.get("enabled", True):
-                # Detect person outlines
-                self.ethereal_mask, self.has_person = self.person_outline_detector.detect(current_frame)
+    def _update_ethereal_effects(self, current_frame):
+        """Update ethereal outline effects based on person detection."""
+        # Skip if no frame is available
+        if current_frame is None or "ethereal_outlines" not in self.config:
+            return
+            
+        ethereal_config = self.config.get("ethereal_outlines", {})
+        if not ethereal_config.get("enabled", True):
+            return
+            
+        # Detect person outlines
+        self.ethereal_mask, self.has_person = self.person_outline_detector.detect(current_frame)
+        
+        # Add particle effects to the outlines if enabled
+        if ethereal_config.get("particle_effects", True):
+            self.ethereal_mask = self.person_outline_detector.add_particle_effects(self.ethereal_mask)
+        
+        # Handle color cycling if enabled
+        if ethereal_config.get("color_cycling", True):
+            now = time.time()
+            cycle_speed = ethereal_config.get("color_cycle_speed", 0.05)
+            
+            if now - self.ethereal_last_color_change > cycle_speed:
+                outline_colors = ethereal_config.get("outline_colors", [[140, 220, 255]])
+                self.ethereal_color_index = (self.ethereal_color_index + 1) % len(outline_colors)
+                self.person_outline_detector.config["outline_color"] = outline_colors[self.ethereal_color_index]
+                self.ethereal_last_color_change = now
                 
-                # Add particle effects to the outlines if enabled
-                if ethereal_config.get("particle_effects", True):
-                    self.ethereal_mask = self.person_outline_detector.add_particle_effects(self.ethereal_mask)
-                
-                # Handle color cycling if enabled
-                if ethereal_config.get("color_cycling", True):
-                    now = time.time()
-                    cycle_speed = ethereal_config.get("color_cycle_speed", 0.05)
-                    
-                    if now - self.ethereal_last_color_change > cycle_speed:
-                        outline_colors = ethereal_config.get("outline_colors", [[140, 220, 255]])
-                        self.ethereal_color_index = (self.ethereal_color_index + 1) % len(outline_colors)
-                        self.person_outline_detector.config["outline_color"] = outline_colors[self.ethereal_color_index]
-                        self.ethereal_last_color_change = now
-        
-        # Update firework particles
-        expired_origins = []
-        
-        # Enforce a maximum lifetime for fireworks displays (in seconds)
-        max_firework_lifetime = 3.0
-        current_time = time.time()
-        
-        # Track firework start times if not already being tracked
+    def _update_fireworks(self, dt):
+        """Update firework particle physics and lifetimes."""
+        # Ensure we have the start times tracking dictionary
         if not hasattr(self, 'firework_start_times'):
             self.firework_start_times = {}
             
+        # Enforce a maximum lifetime for fireworks displays (in seconds)
+        max_firework_lifetime = 3.0
+        current_time = time.time()
+        expired_origins = []
+        
+        # Update each firework's particles
         for origin, particles in self.firework_particles.items():
             # Track when this firework started
             if origin not in self.firework_start_times:
@@ -1098,22 +1210,8 @@ class VisualGenerator:
                 expired_origins.append(origin)
                 continue
                 
-            active_particles = []
-            
-            for p in particles:
-                # Update particle position
-                p["x"] += p["dx"]
-                p["y"] += p["dy"]
-                
-                # Add gravity (slightly increased)
-                p["dy"] += 0.15
-                
-                # Age the particle (faster aging)
-                p["age"] += dt * 1.2
-                
-                # Keep particle if still alive
-                if p["age"] < p["lifetime"]:
-                    active_particles.append(p)
+            # Update particles for this firework
+            active_particles = self._update_firework_particles(particles, dt)
             
             # Update or remove particle list
             if active_particles:
@@ -1121,13 +1219,41 @@ class VisualGenerator:
             else:
                 expired_origins.append(origin)
         
-        # Remove expired fireworks
+        # Clean up expired fireworks
+        self._cleanup_expired_fireworks(expired_origins)
+        self._limit_active_fireworks()
+    
+    def _update_firework_particles(self, particles, dt):
+        """Update individual particles in a firework."""
+        active_particles = []
+        
+        for p in particles:
+            # Update particle position
+            p["x"] += p["dx"]
+            p["y"] += p["dy"]
+            
+            # Add gravity (adjusted by particle's gravity modifier if present)
+            gravity_modifier = p.get("gravity_modifier", 1.0)
+            p["dy"] += 0.15 * gravity_modifier
+            
+            # Age the particle (faster aging)
+            p["age"] += dt * 1.2
+            
+            # Keep particle if still alive
+            if p["age"] < p["lifetime"]:
+                active_particles.append(p)
+                
+        return active_particles
+    
+    def _cleanup_expired_fireworks(self, expired_origins):
+        """Remove expired fireworks from tracking dictionaries."""
         for origin in expired_origins:
             self.firework_particles.pop(origin, None)
             if origin in self.firework_start_times:
                 self.firework_start_times.pop(origin)
                 
-        # Limit total number of active fireworks
+    def _limit_active_fireworks(self):
+        """Ensure we don't exceed the maximum number of active fireworks."""
         max_active_fireworks = 2
         if len(self.firework_particles) > max_active_fireworks:
             # Remove oldest fireworks until we're within limit
@@ -1141,68 +1267,80 @@ class VisualGenerator:
                     self.firework_particles.pop(origin)
                 if origin in self.firework_start_times:
                     self.firework_start_times.pop(origin)
+    
+    def _update_floating_objects(self, dt):
+        """Update floating diyas and rangoli patterns."""
+        self._update_floating_diyas(dt)
+        self._update_floating_rangolis(dt)
+    
+    def _update_floating_diyas(self, dt):
+        """Update floating diya objects."""
+        if not self.config.get("diya", {}).get("floating", {}).get("enabled", True):
+            return
             
-        # Update floating diyas
-        if self.config.get("diya", {}).get("floating", {}).get("enabled", True):
-            # Spawn new floating diyas if needed
-            now = time.time()
-            spawn_rate = self.config.get("diya", {}).get("floating", {}).get("spawn_rate", 5.0)
-            max_count = self.config.get("diya", {}).get("floating", {}).get("max_count", 5)
-            
-            if now - self.last_diya_spawn_time > spawn_rate and len(self.floating_diyas) < max_count and self.diya_images:
-                # Choose a random diya image
-                diya_img = random.choice(self.diya_images)
-                speed_factor = self.config.get("diya", {}).get("floating", {}).get("speed_factor", 0.5)
-                size_factor = self.config.get("diya", {}).get("scale_factor", 0.5)
-                
-                # Create a new floating diya
-                self.floating_diyas.append(FloatingObject(
-                    diya_img, 
-                    self.screen_size, 
-                    speed_factor=speed_factor,
-                    rotation_speed=random.uniform(-0.5, 0.5),
-                    size_factor=size_factor
-                ))
-                self.last_diya_spawn_time = now
-                
-            # Update existing floating diyas
-            new_diyas = []
-            for diya in self.floating_diyas:
-                if not diya.update(dt):  # Returns True if off-screen
-                    new_diyas.append(diya)
-            self.floating_diyas = new_diyas
-            
-        # Update floating rangolis
-        if self.config.get("rangoli", {}).get("floating", {}).get("enabled", True):
-            # Spawn new floating rangolis if needed
-            now = time.time()
-            spawn_rate = self.config.get("rangoli", {}).get("floating", {}).get("spawn_rate", 8.0)
-            max_count = self.config.get("rangoli", {}).get("floating", {}).get("max_count", 3)
-            
-            patterns = self.mandala_surfaces if self.mandala_surfaces else self.rangoli_patterns
-            if now - self.last_rangoli_spawn_time > spawn_rate and len(self.floating_rangolis) < max_count and patterns:
-                # Choose a random rangoli pattern
-                rangoli_img = random.choice(patterns)
-                speed_factor = self.config.get("rangoli", {}).get("floating", {}).get("speed_factor", 0.3)
-                
-                # Create a new floating rangoli
-                self.floating_rangolis.append(FloatingObject(
-                    rangoli_img, 
-                    self.screen_size, 
-                    speed_factor=speed_factor,
-                    rotation_speed=random.uniform(-0.3, 0.3),
-                    size_factor=random.uniform(0.15, 0.25)  # Smaller size for rangolis as they can be large
-                ))
-                self.last_rangoli_spawn_time = now
-                
-            # Update existing floating rangolis
-            new_rangolis = []
-            for rangoli in self.floating_rangolis:
-                if not rangoli.update(dt):  # Returns True if off-screen
-                    new_rangolis.append(rangoli)
-            self.floating_rangolis = new_rangolis
+        # Spawn new floating diyas if needed
+        now = time.time()
+        spawn_rate = self.config.get("diya", {}).get("floating", {}).get("spawn_rate", 5.0)
+        max_count = self.config.get("diya", {}).get("floating", {}).get("max_count", 5)
         
-        # Increment frame counter
+        if now - self.last_diya_spawn_time > spawn_rate and len(self.floating_diyas) < max_count and self.diya_images:
+            # Choose a random diya image
+            diya_img = random.choice(self.diya_images)
+            speed_factor = self.config.get("diya", {}).get("floating", {}).get("speed_factor", 0.5)
+            size_factor = self.config.get("diya", {}).get("scale_factor", 0.5)
+            
+            # Create a new floating diya
+            self.floating_diyas.append(FloatingObject(
+                diya_img, 
+                self.screen_size, 
+                speed_factor=speed_factor,
+                rotation_speed=random.uniform(-0.5, 0.5),
+                size_factor=size_factor
+            ))
+            self.last_diya_spawn_time = now
+            
+        # Update existing floating diyas
+        new_diyas = []
+        for diya in self.floating_diyas:
+            if not diya.update(dt):  # Returns True if off-screen
+                new_diyas.append(diya)
+        self.floating_diyas = new_diyas
+    
+    def _update_floating_rangolis(self, dt):
+        """Update floating rangoli objects."""
+        if not self.config.get("rangoli", {}).get("floating", {}).get("enabled", True):
+            return
+            
+        # Spawn new floating rangolis if needed
+        now = time.time()
+        spawn_rate = self.config.get("rangoli", {}).get("floating", {}).get("spawn_rate", 8.0)
+        max_count = self.config.get("rangoli", {}).get("floating", {}).get("max_count", 3)
+        
+        patterns = self.mandala_surfaces if self.mandala_surfaces else self.rangoli_patterns
+        if now - self.last_rangoli_spawn_time > spawn_rate and len(self.floating_rangolis) < max_count and patterns:
+            # Choose a random rangoli pattern
+            rangoli_img = random.choice(patterns)
+            speed_factor = self.config.get("rangoli", {}).get("floating", {}).get("speed_factor", 0.3)
+            
+            # Create a new floating rangoli
+            self.floating_rangolis.append(FloatingObject(
+                rangoli_img, 
+                self.screen_size, 
+                speed_factor=speed_factor,
+                rotation_speed=random.uniform(-0.3, 0.3),
+                size_factor=random.uniform(0.15, 0.25)  # Smaller size for rangolis as they can be large
+            ))
+            self.last_rangoli_spawn_time = now
+            
+        # Update existing floating rangolis
+        new_rangolis = []
+        for rangoli in self.floating_rangolis:
+            if not rangoli.update(dt):  # Returns True if off-screen
+                new_rangolis.append(rangoli)
+        self.floating_rangolis = new_rangolis
+        
+    def _increment_frame_counter(self):
+        """Increment the internal frame counter."""
         self.current_frame += 1
     
     def render(self, state, state_data, surface):
@@ -1223,53 +1361,65 @@ class VisualGenerator:
         # Update screen size for floating objects
         self.screen_size = result.get_size()
         
+        # Render layers in order of back-to-front
+        self._render_background_layer(result)
+        self._render_state_specific_layer(result, state, state_data)
+        self._render_ethereal_outlines(result, state_data)
+        self._render_floating_objects_layer(result)
+        
+        return result
+        
+    def _render_background_layer(self, surface):
+        """Render the background and base rangoli pattern."""
         # Render background image if available
-        self._render_background(result)
+        self._render_background(surface)
         
         # Always render the psychedelic rangoli pattern in the background
         # Use semi-transparent effect so it doesn't overpower other elements
-        width, height = result.get_size()
-        self._render_rangoli(result, {"rangoli_center": (width // 2, height // 2)}, alpha=180)
-        
-        # Process different visual states
+        width, height = surface.get_size()
+        self._render_rangoli(surface, {"rangoli_center": (width // 2, height // 2)}, alpha=180)
+    
+    def _render_state_specific_layer(self, surface, state, state_data):
+        """Render visuals specific to the current state."""
         if state == VisualState.IDLE:
-            # In idle state, we might want to make the rangoli more prominent
-            self._render_rangoli(result, state_data, alpha=220)
+            # In idle state, make the rangoli more prominent
+            self._render_rangoli(surface, state_data, alpha=220)
         elif state == VisualState.DIYA:
-            self._render_diyas(result, state_data)
+            self._render_diyas(surface, state_data)
         elif state == VisualState.FIREWORKS:
-            # Track the last time fireworks were created
-            if not hasattr(self, 'last_firework_time'):
-                self.last_firework_time = 0
-                
-            # Don't create fireworks too frequently (at most once every 2 seconds)
-            current_time = time.time()
-            if current_time - self.last_firework_time > 2.0:
-                # Limit the number of firework origins to process at once
-                if 'firework_origins' in state_data and state_data['firework_origins']:
-                    # Only keep the latest origin point
-                    state_data['firework_origins'] = [state_data['firework_origins'][-1]]
-                    self.last_firework_time = current_time
-                    
-            self._render_fireworks(result, state_data)
+            self._render_fireworks_with_rate_limiting(surface, state_data)
         elif state == VisualState.RANGOLI:
             # For rangoli state, render at full opacity on top
-            self._render_rangoli(result, state_data, alpha=255)
+            self._render_rangoli(surface, state_data, alpha=255)
         elif state == VisualState.AURA:
-            self._render_aura(result, state_data)
-        
-        # Render ethereal outlines (people detection) if enabled and available
-        self._render_ethereal_outlines(result, state_data)
-        
+            self._render_aura(surface, state_data)
+    
+    def _render_fireworks_with_rate_limiting(self, surface, state_data):
+        """Render fireworks with rate limiting to avoid too many at once."""
+        # Track the last time fireworks were created
+        if not hasattr(self, 'last_firework_time'):
+            self.last_firework_time = 0
+            
+        # Don't create fireworks too frequently (at most once every 2 seconds)
+        current_time = time.time()
+        if current_time - self.last_firework_time > 2.0:
+            # Limit the number of firework origins to process at once
+            if 'firework_origins' in state_data and state_data['firework_origins']:
+                # Only keep the latest origin point
+                state_data['firework_origins'] = [state_data['firework_origins'][-1]]
+                self.last_firework_time = current_time
+                
+        self._render_fireworks(surface, state_data)
+    
+    def _render_floating_objects_layer(self, surface):
+        """Render all floating objects (diyas and rangolis)."""
         # Render floating diyas
         for diya in self.floating_diyas:
-            diya.draw(result)
+            diya.draw(surface)
             
         # Render floating rangolis
         for rangoli in self.floating_rangolis:
-            rangoli.draw(result)
-        
-        return result
+            rangoli.draw(surface)
         
     def _render_background(self, surface):
         """Render the background image behind all other content."""
@@ -1326,6 +1476,11 @@ class VisualGenerator:
     
     def _render_fireworks(self, surface, state_data):
         """Render firework particle effects."""
+        self._process_new_firework_origins(state_data)
+        self._draw_firework_particles(surface)
+    
+    def _process_new_firework_origins(self, state_data):
+        """Process new firework origins from state data."""
         # Check for new firework origins
         firework_origins = state_data.get("firework_origins", [])
         
@@ -1341,8 +1496,9 @@ class VisualGenerator:
                 # Reduce particle count
                 count = min(50, self.config["fireworks"].get("particle_count", 100))
                 self.firework_particles[origin] = self._create_firework_particles(origin, count)
-        
-        # Draw all active firework particles - use softer rendering
+    
+    def _draw_firework_particles(self, surface):
+        """Draw all active firework particles with soft rendering."""
         for particles in self.firework_particles.values():
             for p in particles:
                 # Calculate fade based on age
@@ -1361,6 +1517,27 @@ class VisualGenerator:
     
     def _render_rangoli(self, surface, state_data, alpha=200):
         """Render psychedelic rotating rangoli pattern."""
+        # Step 1: Get rangoli pattern to render
+        rangoli = self._get_rangoli_pattern()
+        if not rangoli:
+            return
+            
+        # Step 2: Get the center position for the rangoli
+        center = self._get_rangoli_center(surface, state_data)
+        
+        # Step 3: Apply color cycling and effects
+        rangoli_with_effects = self._apply_rangoli_effects(rangoli)
+        
+        # Step 4: Generate the rotated layers
+        rotated_layers = self._create_rotated_rangoli_layers(rangoli_with_effects, center, alpha)
+        
+        # Step 5: Draw the layers with proper blending
+        blend_flag = self._get_rangoli_blend_mode()
+        for layer in rotated_layers:
+            surface.blit(layer["surface"], layer["position"], special_flags=blend_flag)
+    
+    def _get_rangoli_pattern(self):
+        """Get the current rangoli pattern to display."""
         # Ensure we have patterns to render
         patterns = self.mandala_surfaces if self.mandala_surfaces else self.rangoli_patterns
         
@@ -1370,40 +1547,31 @@ class VisualGenerator:
             patterns = self.mandala_surfaces if self.mandala_surfaces else self.rangoli_patterns
         
         if not patterns:
-            return
+            return None
             
-        # Get the center position for the rangoli
+        # Use frame count to cycle through patterns
+        pattern_index = (self.current_frame // 180) % len(patterns)
+        return patterns[pattern_index]
+    
+    def _get_rangoli_center(self, surface, state_data):
+        """Determine the center position for the rangoli."""
         center = state_data.get("rangoli_center")
         
         # If no center specified, use the center of the surface
         if not center:
             width, height = surface.get_size()
             center = (width // 2, height // 2)
-        
-        # Use frame count to cycle through patterns
-        pattern_index = (self.current_frame // 180) % len(patterns)
-        rangoli = patterns[pattern_index]
-        
+            
+        return center
+    
+    def _apply_rangoli_effects(self, rangoli):
+        """Apply color cycling and other effects to the rangoli pattern."""
         # Create a copy for color modifications - ensure we maintain the alpha channel
         rangoli_copy = rangoli.copy().convert_alpha()
         
         # Apply psychedelic color cycling effect if using Bezier mandalas
         if self.mandala_surfaces:
-            # Create a color overlay for psychedelic effect - with alpha channel
-            overlay = pygame.Surface(rangoli.get_size(), pygame.SRCALPHA)
-            
-            # Get a psychedelic color based on the current cycle
-            r, g, b = colorsys.hsv_to_rgb(self.color_cycle_hue, 1.0, 1.0)
-            # Use a lower alpha for the overlay to avoid washing out the pattern
-            overlay_color = (int(r*255), int(g*255), int(b*255), 80)
-            
-            # Only fill non-transparent pixels with the overlay color
-            # This preserves the transparency of the original pattern
-            temp_surf = rangoli.copy().convert_alpha()
-            temp_surf.fill(overlay_color, special_flags=pygame.BLEND_RGBA_MULT)
-            
-            # Apply the overlay to our copy, preserving transparency
-            rangoli_copy.blit(temp_surf, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+            rangoli_copy = self._apply_color_cycling(rangoli_copy)
         
         # Get psychedelic configuration
         rangoli_config = self.config.get("rangoli", {})
@@ -1418,14 +1586,37 @@ class VisualGenerator:
             scaled_size = (int(rangoli_copy.get_width() * zoom_factor), 
                           int(rangoli_copy.get_height() * zoom_factor))
             scaled_rangoli = pygame.transform.smoothscale(rangoli_copy, scaled_size)
-        else:
-            scaled_rangoli = rangoli_copy
+            return scaled_rangoli
         
+        return rangoli_copy
+    
+    def _apply_color_cycling(self, rangoli_surface):
+        """Apply color cycling effect to the rangoli surface."""
+        # Create a color overlay for psychedelic effect - with alpha channel
+        overlay = pygame.Surface(rangoli_surface.get_size(), pygame.SRCALPHA)
+        
+        # Get a psychedelic color based on the current cycle
+        r, g, b = colorsys.hsv_to_rgb(self.color_cycle_hue, 1.0, 1.0)
+        # Use a lower alpha for the overlay to avoid washing out the pattern
+        overlay_color = (int(r*255), int(g*255), int(b*255), 80)
+        
+        # Only fill non-transparent pixels with the overlay color
+        # This preserves the transparency of the original pattern
+        temp_surf = rangoli_surface.copy().convert_alpha()
+        temp_surf.fill(overlay_color, special_flags=pygame.BLEND_RGBA_MULT)
+        
+        # Apply the overlay to our copy, preserving transparency
+        rangoli_surface.blit(temp_surf, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+        
+        return rangoli_surface
+    
+    def _create_rotated_rangoli_layers(self, rangoli_surface, center, alpha):
+        """Create rotated layers of the rangoli for complex visual effect."""
         # Rotate the pattern - ensure we maintain alpha channel
-        rotated = pygame.transform.rotate(scaled_rangoli, self.rangoli_angle)
+        rotated = pygame.transform.rotate(rangoli_surface, self.rangoli_angle)
         
         # Add a second rotated copy with different rotation for more complexity
-        rotated2 = pygame.transform.rotate(scaled_rangoli, -self.rangoli_angle * 0.7)
+        rotated2 = pygame.transform.rotate(rangoli_surface, -self.rangoli_angle * 0.7)
         
         # Position the patterns centered on the specified point
         x1 = center[0] - rotated.get_width() // 2
@@ -1447,6 +1638,17 @@ class VisualGenerator:
             rotated = temp1
             rotated2 = temp2
         
+        # Return the layers in drawing order (bottom to top)
+        return [
+            {"surface": rotated2, "position": (x2, y2)},
+            {"surface": rotated, "position": (x1, y1)}
+        ]
+    
+    def _get_rangoli_blend_mode(self):
+        """Get the appropriate blend mode for rangoli rendering."""
+        rangoli_config = self.config.get("rangoli", {})
+        psychedelic_config = rangoli_config.get("psychedelic", {})
+        
         # Get blend mode
         blend_mode = psychedelic_config.get("blend_mode", "add").lower()
         blend_flag = pygame.BLEND_RGBA_ADD  # default - using RGBA version for better transparency
@@ -1457,10 +1659,8 @@ class VisualGenerator:
             blend_flag = pygame.BLEND_RGBA_MULT
         elif blend_mode == "rgba_add":
             blend_flag = pygame.BLEND_RGBA_ADD
-        
-        # Draw the rangoli layers with proper alpha blending
-        surface.blit(rotated2, (x2, y2), special_flags=blend_flag)
-        surface.blit(rotated, (x1, y1), special_flags=blend_flag)
+            
+        return blend_flag
     
     def _render_aura(self, surface, state_data):
         """Render glowing aura effect around a position."""
@@ -1505,33 +1705,38 @@ class VisualGenerator:
         """Render ethereal outlines of people detected in the scene."""
         # Skip if not enabled or no mask available
         ethereal_config = self.config.get("ethereal_outlines", {})
-        if not ethereal_config.get("enabled", True) or self.ethereal_mask is None:
+        if not ethereal_config.get("enabled", True) or self.ethereal_mask is None or not self.has_person:
             return
             
-        # Convert the ethereal mask from OpenCV format (numpy) to pygame surface
-        if self.has_person:
-            # Create pygame surface from numpy array
-            h, w = self.ethereal_mask.shape[:2]
-            
-            # Convert from BGR (OpenCV) to RGB (Pygame)
-            ethereal_rgb = cv2.cvtColor(self.ethereal_mask, cv2.COLOR_BGR2RGB)
-            
-            # Set opacity if configured
-            opacity = ethereal_config.get("opacity", 0.8)
-            
-            # Convert to pygame surface
-            ethereal_surface = pygame.surfarray.make_surface(ethereal_rgb.swapaxes(0, 1))
-            
-            # Apply opacity
-            ethereal_surface.set_alpha(int(opacity * 255))
-            
-            # Scale the ethereal surface to match the display surface if needed
-            surface_width, surface_height = surface.get_size()
-            if w != surface_width or h != surface_height:
-                ethereal_surface = pygame.transform.scale(ethereal_surface, (surface_width, surface_height))
+        # Process and render the ethereal effect
+        ethereal_surface = self._create_ethereal_surface(ethereal_config)
+        self._render_ethereal_surface(surface, ethereal_surface)
+    
+    def _create_ethereal_surface(self, ethereal_config):
+        """Create a pygame surface from the ethereal mask."""
+        # Convert from BGR (OpenCV) to RGB (Pygame)
+        ethereal_rgb = cv2.cvtColor(self.ethereal_mask, cv2.COLOR_BGR2RGB)
+        
+        # Convert to pygame surface
+        ethereal_surface = pygame.surfarray.make_surface(ethereal_rgb.swapaxes(0, 1))
+        
+        # Apply opacity
+        opacity = ethereal_config.get("opacity", 0.8)
+        ethereal_surface.set_alpha(int(opacity * 255))
+        
+        return ethereal_surface
+    
+    def _render_ethereal_surface(self, target_surface, ethereal_surface):
+        """Scale and render the ethereal surface onto the target surface."""
+        # Scale the ethereal surface to match the display surface if needed
+        target_width, target_height = target_surface.get_size()
+        ethereal_width, ethereal_height = ethereal_surface.get_size()
+        
+        if ethereal_width != target_width or ethereal_height != target_height:
+            ethereal_surface = pygame.transform.scale(ethereal_surface, (target_width, target_height))
                 
-            # Blend the ethereal outlines with the scene using additive blending for glow effect
-            surface.blit(ethereal_surface, (0, 0), special_flags=pygame.BLEND_ADD)
+        # Blend the ethereal outlines with the scene using additive blending for glow effect
+        target_surface.blit(ethereal_surface, (0, 0), special_flags=pygame.BLEND_ADD)
     
     def _adjust_brightness(self, surface, factor):
         """Adjust the brightness of a surface by a factor."""
