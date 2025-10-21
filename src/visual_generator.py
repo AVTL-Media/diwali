@@ -15,8 +15,6 @@ import colorsys
 from pathlib import Path
 from scene_manager import VisualState
 from person_outline_detector import PersonOutlineDetector
-# No longer using RandomMandala as it doesn't work as expected
-# We'll create our own mandala generator
 
 
 class FloatingObject:
@@ -996,8 +994,6 @@ class VisualGenerator:
             colors.append((r, g, b, alpha))
             
         return colors
-            
-        return colors
     
     def _create_firework_particles(self, origin, count=100):
         """Create a new firework explosion at the given origin."""
@@ -1292,10 +1288,7 @@ class VisualGenerator:
             # Draw the background
             surface.blit(scaled_bg, (0, 0))
     
-    def _render_idle(self, surface, state_data):
-        """Render idle state with subtle rangoli background."""
-        self._render_rangoli(surface, state_data, alpha=100)  # Semi-transparent
-    
+
     def _render_diyas(self, surface, state_data):
         """Render diya effect at specified positions."""
         if not self.diya_images:
