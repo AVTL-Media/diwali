@@ -35,7 +35,10 @@ The plan is divided into six phases over 11 weeks, with **critical reordering** 
 
 **Deliverable**: App runs with new config/asset/error systems
 
-[Configuration Management](phase1_configuration_management.md) | [Asset Management](phase1_asset_management.md) | [Error Handling](phase2_error_handling.md)
+**Task Files**:
+- [Task 1: ConfigManager](phase1_task1_config_manager.md)
+- [Task 2: AssetManager](phase1_task2_asset_manager.md)
+- [Task 3: Error Handling & Logging](phase1_task3_error_handling.md)
 
 ### Phase 2: Testing Foundation (Weeks 2-3) ⚡ CRITICAL CHANGE
 
@@ -46,7 +49,9 @@ The plan is divided into six phases over 11 weeks, with **critical reordering** 
 
 **Deliverable**: 40%+ test coverage, CI/CD pipeline, confidence for refactoring
 
-[Testing Infrastructure](phase7_testing_infrastructure.md)
+**Task Files**:
+- [Task 1: Test Infrastructure Setup](phase2_task1_test_infrastructure.md)
+- [Parallel Test Writing Tasks](phase2_tests_parallel.md)
 
 ### Phase 3: Architectural Patterns (Weeks 4-5) ⚡ CRITICAL CHANGE
 
@@ -59,7 +64,7 @@ The plan is divided into six phases over 11 weeks, with **critical reordering** 
 
 **Note**: This MUST come before component extraction so extracted components use the right patterns
 
-[Event Handling](phase6_event_handling.md) | [State Machine](phase6_state_machine.md)
+**Task File**: [Event System & State Machine (Sequential)](phase3_sequential.md)
 
 ### Phase 4: Component Decomposition (Weeks 6-8)
 
@@ -73,7 +78,7 @@ The plan is divided into six phases over 11 weeks, with **critical reordering** 
 
 **Dependencies**: Requires Event System and State Machine from Phase 3
 
-[Component Decomposition](phase4_component_decomposition.md)
+**Task File**: [Parallel Component Extraction](phase4_parallel_components.md)
 
 ### Phase 5: Method Refactoring (Week 9) ⚡ MOVED BACK
 
@@ -85,7 +90,7 @@ The plan is divided into six phases over 11 weeks, with **critical reordering** 
 
 **Deliverable**: Clean, well-organized component methods
 
-[Update Methods](phase3_refactor_update_methods.md) | [Render Methods](phase3_refactor_render_methods.md)
+**Task File**: [Parallel Method Refactoring](phase5_parallel_refactoring.md)
 
 ### Phase 6: Performance & Concurrency (Weeks 10-11)
 
@@ -96,7 +101,7 @@ The plan is divided into six phases over 11 weeks, with **critical reordering** 
 
 **Deliverable**: 60 FPS on target hardware, responsive UI
 
-[Performance Optimization](phase5_performance_optimization.md) | [Thread Safety](phase5_thread_safety.md)
+**Task File**: [Parallel Performance & Threading](phase6_parallel_performance.md)
 
 ## Complete Timeline - REVISED
 

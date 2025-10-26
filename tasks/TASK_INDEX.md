@@ -6,15 +6,18 @@ This document provides a chronological index of all implementation tasks for the
 
 ## Phase 1: Foundation (Weeks 1-2)
 
-- [Configuration Management System](phase1_configuration_management.md)
-- [Asset Management System](phase1_asset_management.md)
-- [Error Handling Framework](phase2_error_handling.md)
+**Parallel Tasks** (up to 3 agents):
+- [Task 1: ConfigManager](phase1_task1_config_manager.md) - Agent A, Week 1
+- [Task 2: AssetManager](phase1_task2_asset_manager.md) - Agent B, Week 1
+- [Task 3: Error Handling & Logging](phase1_task3_error_handling.md) - Agent A, Week 2
 
 **Goal**: Establish core infrastructure (Config, Assets, Logging, Error Handling)
 
 ## Phase 2: Testing Foundation (Weeks 2-3)
 
-- [Testing Infrastructure](phase7_testing_infrastructure.md)
+**Parallel Tasks** (up to 3 agents):
+- [Task 1: Test Infrastructure Setup](phase2_task1_test_infrastructure.md) - Agent B, Week 2
+- [Parallel Test Writing Tasks](phase2_tests_parallel.md) - Agents A, B, C, Week 3
 
 **Goal**: Build safety net for refactoring (runs parallel with Phase 1, Week 2)
 
@@ -22,16 +25,24 @@ This document provides a chronological index of all implementation tasks for the
 
 ## Phase 3: Architectural Patterns (Weeks 4-5)
 
-- [Event Handling System](phase6_event_handling.md)
-- [State Machine Implementation](phase6_state_machine.md)
+**Sequential Tasks** (1 agent only - bottleneck):
+- [Event System & State Machine](phase3_sequential.md) - Agent A, Weeks 4-5
 
 **Goal**: Establish communication and state patterns
 
 **Critical**: Architecture must be in place BEFORE component extraction
 
+**Warning**: This is the critical path - only 1 agent can work effectively
+
 ## Phase 4: Component Decomposition (Weeks 6-8)
 
-- [Component Decomposition](phase4_component_decomposition.md)
+**Parallel Tasks** (up to 4 agents):
+- [Parallel Component Extraction](phase4_parallel_components.md) - Agents A, B, C, D
+  - Task 4.1: FireworksManager (Agent A)
+  - Task 4.2: RangoliRenderer (Agent B)
+  - Task 4.3: EtherealEffects (Agent C)
+  - Task 4.4: FloatingObjects (Agent D)
+  - Task 4.5: Integration Testing (All, Week 8)
 
 **Goal**: Break down monolithic VisualGenerator into focused components
 
@@ -39,8 +50,12 @@ This document provides a chronological index of all implementation tasks for the
 
 ## Phase 5: Method Refactoring (Week 9)
 
-- [Update Methods Refactoring](phase3_refactor_update_methods.md)
-- [Render Methods Refactoring](phase3_refactor_render_methods.md)
+**Parallel Tasks** (up to 4 agents):
+- [Parallel Method Refactoring](phase5_parallel_refactoring.md) - Agents A, B, C, D
+  - Task 5.1: Refactor FireworksManager (Agent A)
+  - Task 5.2: Refactor RangoliRenderer (Agent B)
+  - Task 5.3: Refactor EtherealEffects (Agent C)
+  - Task 5.4: Refactor FloatingObjects (Agent D)
 
 **Goal**: Refine extracted components
 
@@ -48,8 +63,10 @@ This document provides a chronological index of all implementation tasks for the
 
 ## Phase 6: Performance & Concurrency (Weeks 10-11)
 
-- [Performance Optimization](phase5_performance_optimization.md)
-- [Thread Safety Implementation](phase5_thread_safety.md)
+**Parallel Tasks** (up to 2 agents):
+- [Parallel Performance & Threading](phase6_parallel_performance.md) - Agents A, B
+  - Task 6.1: Performance Optimization (Agent A, Week 10)
+  - Task 6.2: Thread Safety & Concurrency (Agent B, Week 11)
 
 **Goal**: Optimize stable architecture
 
@@ -84,16 +101,34 @@ Phase 6 (Performance & Concurrency) ← Optimize stable architecture
 
 For best results, implement tasks in this order:
 
-1. **Configuration Manager** (Week 1)
-2. **Asset Management** (Week 1)
-3. **Error Handling Framework** (Week 2)
-4. **Testing Infrastructure** (Weeks 2-3) ← **EARLY TESTING**
-5. **Event Handling System** (Week 4) ← **ARCHITECTURE FIRST**
-6. **State Machine Pattern** (Week 5) ← **ARCHITECTURE FIRST**
-7. **Component Decomposition** (Weeks 6-8) ← Now can use events/states
-8. **Update & Render Method Refactoring** (Week 9) ← Refactor extracted code
-9. **Performance Optimization** (Week 10)
-10. **Thread Safety Implementation** (Week 11)
+### Phase 1 (Weeks 1-2)
+1. **ConfigManager** (Week 1) - [phase1_task1_config_manager.md](phase1_task1_config_manager.md)
+2. **AssetManager** (Week 1) - [phase1_task2_asset_manager.md](phase1_task2_asset_manager.md)
+3. **Error Handling** (Week 2) - [phase1_task3_error_handling.md](phase1_task3_error_handling.md)
+
+### Phase 2 (Weeks 2-3) ← **EARLY TESTING**
+4. **Test Infrastructure** (Week 2) - [phase2_task1_test_infrastructure.md](phase2_task1_test_infrastructure.md)
+5. **Test Writing** (Week 3) - [phase2_tests_parallel.md](phase2_tests_parallel.md)
+
+### Phase 3 (Weeks 4-5) ← **ARCHITECTURE FIRST**
+6. **Event System & State Machine** (Weeks 4-5) - [phase3_sequential.md](phase3_sequential.md)
+
+### Phase 4 (Weeks 6-8) ← Now can use events/states
+7. **Component Extraction** (Weeks 6-8) - [phase4_parallel_components.md](phase4_parallel_components.md)
+
+### Phase 5 (Week 9) ← Refactor extracted code
+8. **Method Refactoring** (Week 9) - [phase5_parallel_refactoring.md](phase5_parallel_refactoring.md)
+
+### Phase 6 (Weeks 10-11)
+9. **Performance Optimization** (Week 10) - [phase6_parallel_performance.md](phase6_parallel_performance.md)
+10. **Thread Safety** (Week 11) - [phase6_parallel_performance.md](phase6_parallel_performance.md)
+
+## Additional Resources
+
+- 📖 [REVISED_PLAN.md](REVISED_PLAN.md) - Why the plan was revised
+- 🔄 [INCREMENTAL_MIGRATION.md](INCREMENTAL_MIGRATION.md) - Feature flags and rollback strategy
+- 👥 [PARALLELIZATION_GUIDE.md](PARALLELIZATION_GUIDE.md) - Multi-agent coordination guide
+- 📋 [README.md](README.md) - Phase summaries and timeline
 
 ## Critical Success Factors
 
