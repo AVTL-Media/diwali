@@ -1,8 +1,14 @@
 # State Machine Pattern Implementation
 
+⚠️ **REVISED PLAN UPDATE**: This is now **Phase 3, Week 5** (moved from original Phase 6, Weeks 9-10).
+
+**Critical Change**: State Machine now comes **BEFORE** component extraction (Phase 4) so components understand what states exist and how to interact with them.
+
 ## Overview
 
-This task focuses on implementing a formal State Machine pattern for the scene transitions in the Diwali Projection System, replacing the current ad hoc state management in `SceneManager`.
+This task focuses on implementing a formal State Machine pattern that will guide component behavior in Phase 4.
+
+**IMPORTANT**: This must be completed before Phase 4 (Component Decomposition) begins.
 
 ## Current State
 

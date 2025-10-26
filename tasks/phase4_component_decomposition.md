@@ -1,15 +1,22 @@
 # Component Decomposition and Refactoring Implementation
 
-This document outlines the implementation plan for Component Decomposition and Refactoring, which is Phase 3 of the Diwali Projection System improvements.
+⚠️ **REVISED PLAN UPDATE**: This is now **Phase 4** (Weeks 6-8), moved from original Phase 4 (Weeks 5-6).
+
+**Critical Dependencies**: This phase now requires Phase 3 (Event System & State Machine) to be completed first.
+
+This document outlines the implementation plan for Component Decomposition and Refactoring, which is **Phase 4** of the Diwali Projection System improvements.
 
 ## Overview
 
 This phase focuses on breaking down the monolithic `VisualGenerator` class into smaller, more focused components that follow a consistent interface pattern.
 
-## Timeline
+**IMPORTANT**: Components should be designed to use the Event System and State Machine patterns established in Phase 3.
 
-- **Week 4**: Core Component Extraction (FireworksManager, RangoliRenderer)
-- **Week 5**: Additional Component Extraction and Integration
+## Timeline - REVISED
+
+- **Week 6**: Core Component Extraction (FireworksManager, RangoliRenderer)
+- **Week 7**: Additional Component Extraction (EtherealEffects, FloatingObjects)
+- **Week 8**: Integration Testing and Stabilization
 
 ## Technical Specifications
 

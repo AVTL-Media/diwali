@@ -1,16 +1,20 @@
 # Visual Component Update Methods Refactoring
 
+⚠️ **REVISED PLAN UPDATE**: This is now part of **Phase 5** (Week 9), moved from original Phase 3 (Week 4).
+
+**Critical Change**: This refactoring now operates on **already extracted components** from Phase 4, not the monolithic VisualGenerator.
+
 ## Overview
 
-This task focuses on refactoring the monolithic `update()` method in the `VisualGenerator` class by decomposing it into smaller, focused methods following the Single Responsibility Principle.
+This task focuses on refactoring update methods in the **extracted component classes** (FireworksManager, RangoliRenderer, etc.) by applying the Single Responsibility Principle.
 
-## Current State
+## Current State (After Phase 4)
 
-The current `update()` method handles multiple responsibilities in a single large function, making it difficult to maintain and test.
+After Phase 4, we have extracted components, but their internal methods may still be large and could benefit from further decomposition.
 
 ## Target State
 
-A hierarchical structure of update methods, each responsible for a specific visual component:
+Each extracted component has clean, focused update methods:
 
 ```python
 def update(self, dt, current_frame=None):

@@ -1,14 +1,21 @@
 # Testing Infrastructure Implementation
 
-This document outlines the implementation plan for the Testing Infrastructure, which is Phase 4 of the Diwali Projection System improvements.
+⚠️ **REVISED PLAN UPDATE**: This is now **Phase 2** (Weeks 2-3), moved from original Phase 7 (Week 11).
+
+**Critical Change**: Testing infrastructure now comes **8 WEEKS EARLIER** to provide a safety net for all subsequent refactoring work.
+
+This document outlines the implementation plan for the Testing Infrastructure, which is **Phase 2** of the Diwali Projection System improvements.
 
 ## Overview
 
-This phase focuses on creating a comprehensive testing framework for the Diwali Projection System, including base test classes, mock objects for hardware dependencies, and sample tests.
+This phase focuses on creating a comprehensive testing framework **EARLY** to provide confidence during the risky refactoring phases ahead.
 
-## Timeline
+**IMPORTANT**: Testing must be in place before Phase 3 (Events/State) and Phase 4 (Component Extraction) begin.
 
-- **Week 6**: Testing Infrastructure and Initial Tests
+## Timeline - REVISED
+
+- **Week 2-3** (parallel with Phase 1 completion): Testing Infrastructure setup
+- **Week 3**: Initial test coverage (40%+ target)
 
 ## Technical Specifications
 

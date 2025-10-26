@@ -1,8 +1,14 @@
 # Event Handling System Refactoring
 
+⚠️ **REVISED PLAN UPDATE**: This is now **Phase 3, Week 4** (moved from original Phase 6, Weeks 9-10).
+
+**Critical Change**: Event System now comes **BEFORE** component extraction (Phase 4) so components can be designed to use events from the start.
+
 ## Overview
 
-This task focuses on consolidating and improving the event handling system in the Diwali Projection System to create a more maintainable and consistent approach to handling user interactions and system events.
+This task focuses on implementing a centralized event handling system that will be used by all components extracted in Phase 4.
+
+**IMPORTANT**: This must be completed before Phase 4 (Component Decomposition) begins.
 
 ## Current State
 

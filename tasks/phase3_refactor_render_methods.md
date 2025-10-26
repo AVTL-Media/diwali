@@ -1,16 +1,20 @@
 # Visual Component Render Methods Refactoring
 
+⚠️ **REVISED PLAN UPDATE**: This is now part of **Phase 5** (Week 9), moved from original Phase 3 (Week 4).
+
+**Critical Change**: This refactoring now operates on **already extracted components** from Phase 4, not the monolithic VisualGenerator.
+
 ## Overview
 
-This task focuses on refactoring the rendering pipeline in the `VisualGenerator` class to use a layered approach for better organization and clarity.
+This task focuses on refactoring render methods in the **extracted component classes** to use clean, layered approaches.
 
-## Current State
+## Current State (After Phase 4)
 
-The current `render()` method contains a mix of concerns, handling different types of visual elements in a monolithic function.
+After Phase 4, we have extracted components with their own render methods. This phase refines those methods for clarity and organization.
 
 ## Target State
 
-A structured rendering pipeline using a layered approach:
+Each component has a structured rendering pipeline:
 
 ```python
 def render(self, state, state_data, surface):
